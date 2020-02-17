@@ -100,6 +100,9 @@
           /* Add a grey background color to the table header and on hover */
           background-color: #f1f1f1;
         }
+        .hide_elem {
+            display: none;
+        }
       </style>
 </head>
 <script id="floGlobals">
@@ -153,8 +156,9 @@
               <li class="nav-item active">
               <li class="nav-item">
                 <a class="nav-link" href="#" id="flo_keys_reset" 
-                onclick="token_app.actions.logout()">Logout</a>
+                onclick="token_app.actions.logout()">Logout </a>
               </li>
+              <li class="nav-link" onclick="token_app.actions.retrieveLatestContent()">Reload Data </li>
               <li class="nav-link" id="token_balance" onclick="refresh_balance()">Refresh Balance</li>
             </ul>
           </div>
@@ -234,7 +238,7 @@
         </div>
   
         <!-- Pending Deposits -->
-        <div class="card">
+        <div class="card hide_elem" id="pending_deposits_div">
           <div class="card-body">
               <h4 class="alert alert-light" role="alert">
                 Cash Deposit Requests List
@@ -266,7 +270,7 @@
         </div>
   
         <!-- Pending Withdrawals -->
-        <div class="card">
+        <div class="card hide_elem" id="pending_withdrawals_div">
           <div class="card-body">
               <h4 class="alert alert-light" role="alert">
                 Cash Withdrawals Requests List
@@ -301,7 +305,7 @@
   
       <footer class="footer">
         <div class="container">
-          <span class="text-muted"> Cashier Page for Token Exchange </span>
+          <span class="text-muted"> Rupee Token Exchange Software </span>
         </div>
       </footer>
   
@@ -9150,25 +9154,21 @@
         masterFLOPubKey: '03BA851FE0F28AA156B0D6E00784919133D1E98284F9A94544B470DBBFB3D90EDD',
         actions: {},
         blocked_flo_ids: [],
-        users: {},
     };
 
     token_app.actions = {
         
         parse_flo_comments: async function() {
             text = `masterFLOPubKey=03BA851FE0F28AA156B0D6E00784919133D1E98284F9A94544B470DBBFB3D90EDD
-            #!#SUBJECT=RUPEE_TOKEN_APP_TEST2
+            #!#SUBJECT=RUPEE_TOKEN_APP_TEST3
             #!#CURRENCY=INR
-            #!#TYPE_DEPOSITS=CASH_DEPOSITS_TEST2
-            #!#TYPE_WITHDRAWS=CASH_WITHDRAWS_TEST2
-            #!#TYPE_WITHDRAWS_MSG=CASH_WITHDRAWS_MESSAGES_TEST2
+            #!#TYPE_DEPOSITS=CASH_DEPOSITS_TEST3
+            #!#TYPE_WITHDRAWS=CASH_WITHDRAWS_TEST3
+            #!#TYPE_MSGES=USER_MESSAGES_TEST3
             #!#cashiers=
             {
                 "FByrY4vc1NRfbkqAqABtUyhhNzMZsKUjqr": {
-                    "upi_id": "7004780931@upi",
-                    "approved_by": "F72fAV6aG8JrzR3N9F43vBE59q1FqWhBAp",
-                    "cashing_permission": true,
-                    "certificate": "3045022100811557f01a64600145241c5c9aa79ca10807735eab0dcc44815767f021ab8a390220604a377083c35d5c547e14f180393e6a27e117fb947096bc040e11b7ab86fa6b"
+                    "upi_id": "7004780931@upi"
                 }
             }`
             text = removeWhiteSpaces(text);
@@ -9252,18 +9252,21 @@
             // fetch configs from master comment
             await this.fetch_configs();
             
-            // Identify logged in user as either buyer, seller, cashier or courier
-            // token_app.loggedInUser = new token_app.users.current_user({
-            //     flo_id: myFloID,
-            // });
-
             await this.retrieveLatestContent();
 
             request_rupee_token();
 
-            withdrawTokenToGetCash();
+            withdraw_token_to_get_cash();
 
             transferTokensManually();
+
+            if(Object.keys(token_app.master_configurations.cashiers).includes(myFloID)) {
+                const pending_withdrawals_div = document.getElementById('pending_withdrawals_div');
+                const pending_deposits_div = document.getElementById('pending_deposits_div');
+                
+                pending_withdrawals_div.classList.remove("hide_elem");
+                pending_deposits_div.classList.remove("hide_elem");
+            }
             
         },
 
@@ -9278,6 +9281,9 @@
 
                 await floCloudAPI.requestGeneralData(token_app.master_configurations.TYPE_WITHDRAWS
                 , { receiverID: myFloID });
+
+                await floCloudAPI.requestGeneralData(token_app.master_configurations.TYPE_MSGES
+                    , { receiverID: myFloID })
 
                 return true;
             } else {
@@ -9295,6 +9301,11 @@
                     promises.push(p2);
 
                 }
+
+                let p3 = floCloudAPI.requestGeneralData(token_app.master_configurations.TYPE_MSGES
+                    , { receiverID: myFloID })
+                
+                promises.push(p3);
 
                 await Promise.all(promises)
             }
@@ -9357,9 +9368,14 @@
         }
     }
 
-    function show_deposit_request() {
+    async function show_deposit_request() {
         try {
             if(!Object.keys(token_app.master_configurations.cashiers).includes(myFloID)) return;
+            
+            let cash_deposits = await compactIDB.readAllData('deposits_flo_txids');
+            console.log(cash_deposits);
+            let cash_deposits_upi_txid_list = Object.values(cash_deposits).map(m=>m.upi_txid);
+            
             const general_msg = floGlobals.generalData[JSON.stringify(
                 { application: floGlobals.application, 
                   type: token_app.master_configurations.TYPE_DEPOSITS 
@@ -9371,12 +9387,13 @@
             let deposits_table = document.getElementById("deposits_list");
             
             for (const m of general_msg) {
+                if(cash_deposits_upi_txid_list.includes(m.message.upi_txid)) continue;
                 t += `<tr id='tr_${m.message.user_flo_id}'>`;
                 t += `<td> ${m.message.user_flo_id} </td>`;
                 t += `<td> ${m.message.upi_txid} </td>`;
                 t += `<td> <button type="button" value="${m.message.upi_txid}" 
                         class="btn btn-info cnf_deposits"
-                        onclick="transfer_token('${m.message.user_flo_id}')">Deposit Received!</button> 
+                        onclick="transfer_token('${m.message.user_flo_id}', '${m.message.upi_txid}')">Deposit Received!</button> 
                     </td>`;
                 t += `</tr>`;
             
@@ -9388,7 +9405,7 @@
         }
     }
 
-    function withdrawTokenToGetCash() {
+    function withdraw_token_to_get_cash() {
         try {
             const withdraw_cash_btn = document.getElementById('withdraw_cash_btn')
             const cashier = randomNoRepeats(Object.keys(token_app.master_configurations.cashiers))();
@@ -9446,32 +9463,38 @@
         }
     }
 
-    function show_withdraw_request() {
+    async function show_withdraw_request() {
         try {
             if(!Object.keys(token_app.master_configurations.cashiers).includes(myFloID)) return;
+        
             const general_msg = floGlobals.generalData[JSON.stringify(
                 { application: floGlobals.application, 
                   type: token_app.master_configurations.TYPE_WITHDRAWS
                 })];
-
             if(typeof general_msg!=="object") {
                 alert(`No data available in withdraws.`);
                 return;
             }
 
+            let cash_withdraws = await compactIDB.readAllData('cash_sent_details');
+            let cash_withdraws_token_txid_list = Object.values(cash_withdraws).map(m=>m.token_txid);
+            console.log(cash_withdraws_token_txid_list);
             console.log(general_msg);
 
             let t = ``;
             let withdraws_table = document.getElementById("withdraws_list");
             
             for (const m of general_msg) {
+                if(cash_withdraws_token_txid_list.includes(m.message.token_txid)) continue;
                 t += `<tr id='tr_${m.message.token_txid}'>`;
                 t += `<td> ${m.message.token_txid} </td>`;
                 t += `<td> ${m.message.user_flo_id} </td>`;
                 t += `<td> ${m.message.withdrawer_upi} </td>`;
                 t += `<td> <button type="button" value="${m.message.token_txid}" 
                         class="btn btn-info cnf_deposits"
-                        onclick="cash_sent('${m.message}')">Cash Sent!</button> 
+                        onclick="cash_sent('${m.message.token_txid}', 
+                            '${m.message.user_flo_id}', '${m.message.withdrawer_upi}')
+                        ">Cash Sent!</button> 
                     </td>`;
                 t += `</tr>`;
             
@@ -9483,8 +9506,12 @@
         }
     }
 
-    async function transfer_token(receiver_flo_id='') {
+    async function transfer_token(receiver_flo_id='', user_upi_txid='') {
         try {
+            if(user_upi_txid.length<1 || receiver_flo_id.length<1) {
+                alert("Receiver FLO id or UPI txid not found.");
+                return;
+            }
             const amount_of_tokens_to_transfer = prompt('Enter the amount of tokens to transfer', 0);
             if(amount_of_tokens_to_transfer>0) {
                 let flo_comment = `transfer ${amount_of_tokens_to_transfer} rupee#`;
@@ -9497,7 +9524,8 @@
                 compactIDB.addData('deposits_flo_txids', 
                     {
                         receiver_flo_id, 
-                        flo_txid, 
+                        flo_txid,
+                        user_upi_txid, 
                         "datetime":+ new Date()
                     }, "flo_txid")
                 alert(`Transfer successfull: ${flo_txid}.`);
@@ -9509,8 +9537,13 @@
         }
     }
 
-    async function cash_sent(input_data) {
+    async function cash_sent(token_id, withdraw_flo_id, withdraw_upi) {
         try {
+            let input_data = {
+                token_txid: token_id,
+                withdrawer_upi: withdraw_upi,
+                withdrawer_flo_id: withdraw_flo_id
+            };
             if(typeof input_data["withdrawer_upi"] !== "string" 
                 || input_data["withdrawer_upi"].length<1) {
                     alert("Withdrawer UPI not found.");
@@ -9543,9 +9576,10 @@
 
             compactIDB.addData("cash_sent_details", input_data, input_data["token_txid"])
             
-            floCloudAPI.sendGeneralData(input_data, 
-                token_app.master_configurations.TYPE_WITHDRAWS_MSG, 
-                { receiverID: receiver_flo_id, senderIDs: [myFloID] })
+            floCloudAPI.sendGeneralData(`Your withdrawal request of INR ${amount_to_transfer} is approved. 
+                Please check reference number ${transfer_upi_txid} in your UPI ${withdraw_upi}`, 
+                token_app.master_configurations.TYPE_MSGES, 
+                { receiverID: input_data['withdrawer_flo_id'], senderIDs: [myFloID] })
                 
         } catch (error) {
             throw new Error(error)
