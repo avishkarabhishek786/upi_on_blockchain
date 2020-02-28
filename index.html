@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Merriweather:700|Roboto:300,400,500,700&display=swap" rel="stylesheet">
-    <title>RUPEE TOKEN APP</title>
+    <title>BLOCKCHAIN UPI APP</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -139,7 +139,7 @@
     <header>
         <!-- Fixed navbar -->
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-          <a class="navbar-brand" href="#">Rupee Token Transfer System</a>
+          <a class="navbar-brand" href="#">Blockchain UPI System</a>
           <button
             class="navbar-toggler"
             type="button"
@@ -189,25 +189,24 @@
           </div>
         </div>
   
-        <h1 class="mt-5">RanchiMall Blockchain Based UPI Payment Software</h1>
+        <h1 class="mt-5">Blockchain Based UPI Payment Software</h1>
         <p class="lead">
-          <code>Rupee Tokens</code> are digital footprint of actual cash you deposit to RanchiMall to
-          avail our services like e-commerce, bus bookings. Use this website to buy or redeem Rupee tokens. For query contact us on 
-          Facebook.com/ranchimall.
+          Your <code>Rupee </code>balance is digital footprint of actual cash. 
+          Use this website to deposit,withdraw or pay Rupee digitally using a Blockchain Id.
         </p>
         
         <div class="card" id="manual_token_transfer_div">
             <div class="card-body">
                   <h4 class="alert alert-light" role="alert">
-                      Manual Token Transfer 
+                      Manual Cash Transfer 
                   </h4>
                   <p><label for="token_receiver">Receiver Flo Address </label>
                   <input type="text" id="token_receiver"></p>
-                  <p><label for="token_name">Choose Token: </label>
+                  <p><label for="token_name">Choose Currency: </label>
                   <input type="radio" id="token_name" name="transfer_token_name" value="rupee"> Rupee </p>
-                  <p><label for="token_amount">Amount of Tokens to transfer: </label>
+                  <p><label for="token_amount">Amount of Rupee to transfer: </label>
                   <input type="number" id="token_amount"></p>
-                  <p><input type="button" class="btn btn-outline-primary" id="send_tokens_btn" value="Send Tokens"></p>
+                  <p><input type="button" class="btn btn-outline-primary" id="send_tokens_btn" value="Send Rupee"></p>
             </div>
         </div>
 
@@ -215,11 +214,11 @@
         <div class="card" id="buy_tokens_div">
             <div class="card-body">
                 <h4 class="alert alert-light" role="alert">
-                    Buy Rupee Tokens
+                    Buy Rupee
                 </h4>
-                <p><label for="token_amount_to_buy">Amount of Tokens to Buy: </label>
+                <p><label for="token_amount_to_buy">Amount of Rupee to Buy: </label>
                 <input type="number" id="token_amount_to_buy"></p>
-                <p><input type="button" class="btn btn-outline-primary" id="request_tokens_btn" value="Buy Tokens"></p>
+                <p><input type="button" class="btn btn-outline-primary" id="request_tokens_btn" value="Buy Rupee"></p>
             </div>
         </div>
         
@@ -227,7 +226,7 @@
         <div class="card" id="withdraw_cash_div">
             <div class="card-body">
                 <h4 class="alert alert-light" role="alert">
-                    Withdraw Cash (Redeem Tokens)
+                    Withdraw Cash (Redeem Rupee to your UPI Account)
                 </h4>
                 <p><label for="withdraw_cash_amount">Amount of Cash to Withdraw: </label>
                 <input type="number" id="withdraw_cash_amount"></p>
@@ -301,11 +300,76 @@
               </table>
           </div>
         </div>
+
+        <!-- Vendors -->
+        <div class="card">
+            <h4 class="alert alert-light" role="alert">
+                Pay Anyone Through Cashier
+            </h4>
+            <!-- <table class="table">
+                <tbody id="pay_vendors_tbl"></tbody>
+            </table> -->
+            <div class="form-group">
+                <label for="recvr_id">Receiver FLO Address</label>
+                <input type="text" class="form-control" id="recvr_id" aria-describedby="recvr_flo_help" placeholder="Enter FLO Address of Receiver">
+                <small id="recvr_flo_help" class="form-text text-muted">You must enter correct FLO address of the receiver here.</small>
+            </div>
+            <div class="form-group">
+                <label for="recvr_amount_to_pay">Amount To Send</label>
+                <input type="number" class="form-control" id="recvr_amount_to_pay" aria-describedby="recvr_amount_help" placeholder="Enter Amount">
+                <small id="recvr_flo_help" class="form-text text-muted">Please specify the amount of cash you want to transfer to Receiver.</small>
+            </div>
+            <div class="form-group">
+                <p id="pay_cashier_info"></p>
+            </div>
+            <div class="form-group">
+                <label for="paid_cashier_upi_txid">Enter UPI Txid/Ref Number </label>
+                <input type="text" class="form-control" id="paid_cashier_upi_txid" aria-describedby="cashier_upi_txid_help" placeholder="Enter UPI Ref. Number">
+                <small id="cashier_upi_txid_help" class="form-text text-muted">Please specify UPI Reference number for the payment you made.</small>
+            </div>
+            <button type="submit" id="cnf_cash_payment" onclick="confirm_pay_through_cashier_request()" class="btn btn-primary">Submit</button>
+
+        </div>
+
+        <!-- Pay Through Cashier List -->
+        <div class="card hide_elem" id="pay_through_cashier_div">
+            <div class="card-body">
+                <h4 class="alert alert-light" role="alert">
+                    Pay Through Cashier List
+                </h4>
+                <input
+                    type="text"
+                    id="searchbar_withdraws"
+                    class="myInput"
+                    onkeyup="search_pay_through_cashier()"
+                    placeholder="Search anything"
+                />
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    id="fetch_pay_through_cashier"
+                    onclick="show_pay_through_cashier_requests()"
+                >
+                    Load Pending Pay Through Cashier
+                </button>
+        
+                <table id="pay_through_cashier_table" class="myTable">
+                    <tr class="header">
+                    <th></th>
+                    <th>UPI Txid</th>
+                    <th>Receiver FLO Address</th>
+                    <th>Amount To Send</th>
+                    <th>Action</th>
+                    </tr>
+                </table>
+            </div>
+            </div>
+
       </main>
   
       <footer class="footer">
         <div class="container">
-          <span class="text-muted"> Rupee Token Exchange Software </span>
+          <span class="text-muted"> Rupee Exchange Software </span>
         </div>
       </footer>
   
@@ -8780,6 +8844,7 @@
                         // for token app
                         deposits_flo_txids:{},
                         cash_sent_details:{},
+                        pay_thru_cashier:{},
                     }
                     //add other given objectStores
                     for (o in this.appObs)
@@ -9051,6 +9116,10 @@
         }
     }
 
+    function toAlphanumeric(str='') {
+        return str.replace(/[^a-z0-9]/gi,'');
+    }
+
     /*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze*/
     function deepFreeze(object) {
         // Retrieve the property names defined on object
@@ -9106,44 +9175,44 @@
           }
         }
 
-        //AJAX Post
-        function ajaxPost(url = ``, data = {}) {
-          return fetch(url, {
-            method: "POST", // *GET, POST, PUT, DELETE, etc.
-            mode: "cors", // no-cors, cors, *same-origin
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            headers: {
-              "Content-Type": "application/json"
-              // "Content-Type": "application/x-www-form-urlencoded",
-            },
-            redirect: "follow", // manual, *follow, error
-            referrer: "no-referrer", // no-referrer, *client
-            body: JSON.stringify(data) // body data type must match "Content-Type" header
-          }).then(response => response.json()); // parses response to JSON
-        }
+    //AJAX Post
+    function ajaxPost(url = ``, data = {}) {
+        return fetch(url, {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "Content-Type": "application/json"
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrer: "no-referrer", // no-referrer, *client
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        }).then(response => response.json()); // parses response to JSON
+    }
 
-        // Create unique id
-        function unique_id() {
-          return `${+new Date()}_${Math.random()
-            .toString(36)
-            .substr(2, 9)}`;
-        }
+    // Create unique id
+    function unique_id() {
+        return `${+new Date()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+    }
 
-        function printArrayOfArrays(arr, resultant_array={}) {
-            if ( typeof(arr) == "object") {
-                for (elem in arr) {
-                    if (arr.hasOwnProperty(elem)) {
-                        printArrayOfArrays(arr[elem], resultant_array);
-                        if(typeof(arr[elem]) !== "object" 
-                        && typeof(arr[elem]) !== "undefined") {
-                            resultant_array[elem] = arr[elem];
-                        }
+    function printArrayOfArrays(arr, resultant_array={}) {
+        if ( typeof(arr) == "object") {
+            for (elem in arr) {
+                if (arr.hasOwnProperty(elem)) {
+                    printArrayOfArrays(arr[elem], resultant_array);
+                    if(typeof(arr[elem]) !== "object" 
+                    && typeof(arr[elem]) !== "undefined") {
+                        resultant_array[elem] = arr[elem];
                     }
                 }
-                return resultant_array;
             }
+            return resultant_array;
         }
+    }
 
 </script>
 
@@ -9165,6 +9234,8 @@
             #!#TYPE_DEPOSITS=CASH_DEPOSITS_TEST3
             #!#TYPE_WITHDRAWS=CASH_WITHDRAWS_TEST3
             #!#TYPE_MSGES=USER_MESSAGES_TEST3
+            #!#TYPE_PAY_THROUGH_CASHIER=PAY_THRU_CASHIER3
+            #!#vendors=FGtPEBu2NFFYkqFrA9NDBJJLpVhyuPubDj,
             #!#cashiers=
             {
                 "FByrY4vc1NRfbkqAqABtUyhhNzMZsKUjqr": {
@@ -9267,6 +9338,23 @@
                 pending_withdrawals_div.classList.remove("hide_elem");
                 pending_deposits_div.classList.remove("hide_elem");
             }
+
+            init_pay_through_cashier_system();
+
+            // build pay vendors ui
+            // const pay_vendors_tbl = document.getElementById('pay_vendors_tbl')
+            // let vd = ``;
+            // for (const vendor_flo_id of token_app.master_configurations.vendors) {
+            //     vd += `<tr>`;
+            //     vd += `<td>`;
+            //     vd += `${vendor_flo_id}`;
+            //     vd += `</td>`;
+            //     vd += `<td>`;
+            //     vd += `<button class="btn btn-primary pay_vendor_class" id="${vendor_flo_id}">Pay</button>`;
+            //     vd += `</td>`;
+            //     vd += `</tr>`;
+            // }
+            // pay_vendors_tbl.insertAdjacentHTML('beforeend', vd);
             
         },
 
@@ -9284,6 +9372,9 @@
 
                 await floCloudAPI.requestGeneralData(token_app.master_configurations.TYPE_MSGES
                     , { receiverID: myFloID })
+
+                await floCloudAPI.requestGeneralData(token_app.master_configurations.TYPE_PAY_THROUGH_CASHIER, 
+                    {receiverID:myFloID});
 
                 return true;
             } else {
@@ -9427,7 +9518,7 @@
                 const token_balance_url = `https://ranchimallflo.duckdns.org/api/v1.0/getFloAddressBalance?token=rupee&floAddress=${myFloID}`;
                 const user_token_balance_object = await ajaxGet(token_balance_url);
                 if(typeof user_token_balance_object!=="object" || typeof user_token_balance_object.balance!=="number") {
-                    alert('You do not have rupee tokens yet. Please buy rupee tokens.');
+                    alert('You do not have rupee balance yet. Please deposit rupee to get balance.');
                     return;
                 }
                 const current_balance = Number(user_token_balance_object.balance);
@@ -9512,7 +9603,7 @@
                 alert("Receiver FLO id or UPI txid not found.");
                 return;
             }
-            const amount_of_tokens_to_transfer = prompt('Enter the amount of tokens to transfer', 0);
+            const amount_of_tokens_to_transfer = prompt('Enter the amount of rupee to transfer', 0);
             if(amount_of_tokens_to_transfer>0) {
                 let flo_comment = `transfer ${amount_of_tokens_to_transfer} rupee#`;
                 let flo_txid = await floBlockchainAPI.sendTx(myFloID, receiver_flo_id, 0.001, myPrivKey, flo_comment)
@@ -9641,6 +9732,132 @@
             throw new Error(error);
         }
     } 
+
+    function init_pay_through_cashier_system() {
+        try {
+            const cashier = randomNoRepeats(Object.keys(token_app.master_configurations.cashiers))();
+            const cashier_upi = token_app.master_configurations.cashiers[cashier].upi_id;
+            const paying_amount_div = document.getElementById('recvr_amount_to_pay')
+            const recvr_id = document.getElementById('recvr_id').value;
+            let amount_to_pay = Number(paying_amount_div.value);
+
+            paying_amount_div.onfocusout = function() {
+                let txt = '';
+                if(typeof amount_to_pay==="number" && amount_to_pay>0) {
+                    txt = `Please pay INR ${amount_to_pay} to ${cashier_upi}. 
+                    Then specify the Tx id or Reference id of the UPI tx below.`;
+                } else txt = '';
+                document.getElementById('pay_cashier_info').innerText = txt;
+            }
+            
+            const cnf_cash_payment_btn = document.getElementById('cnf_cash_payment')
+            cnf_cash_payment_btn.onclick = function() {
+                let paid_cashier_upi_txid = document.getElementById('paid_cashier_upi_txid').value;
+                paid_cashier_upi_txid = toAlphanumeric(paid_cashier_upi_txid);
+                if(recvr_id.length<1 
+                    || amount_to_pay<=0
+                    || paid_cashier_upi_txid.length<1) 
+                    throw new Error("Incomplete information")
+                const req_object = {
+                    receiver_flo_id: recvr_id,
+                    amount: amount_to_pay,
+                    upi_txid: toAlphanumeric(paid_cashier_upi_txid)
+                }
+                floCloudAPI.sendGeneralData(req_object, token_app.master_configurations.TYPE_PAY_THROUGH_CASHIER, 
+                    { receiverID: cashier, senderIDs: [myFloID] });
+
+                alert(`You have sent INR ${amount_to_pay} to ${recvr_id} through our cashier. 
+                Once the cashier ${cashier} receives your payment, he will transfer it to ${recvr_id}.`);
+            }
+
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    function load_pay_through_cashier_requests() {
+        try {
+            if(!Object.keys(token_app.master_configurations.cashiers).includes(myFloID)) return;
+            const user_requests = floGlobals.generalData[JSON.stringify(
+                { application: floGlobals.application, 
+                  type: token_app.master_configurations.TYPE_PAY_THROUGH_CASHIER
+                })];
+
+            let pay_thru_cashier = await compactIDB.readAllData('pay_thru_cashier');
+            let pay_thru_cashier_list = Object.values(pay_thru_cashier).map(m=>m.upi_txid);
+            console.log(pay_thru_cashier_list);
+
+            let t = ``;
+            let pay_through_cashier_table = document.getElementById("pay_through_cashier_table");
+            
+            for (const m of user_requests) {
+                if(pay_thru_cashier_list.includes(m.message.upi_txid)) continue;
+                t += `<tr id='tr_${m.message.upi_txid}'>`;
+                t += `<td> ${m.message.upi_txid} </td>`;
+                t += `<td> ${m.message.receiver_flo_id} </td>`;
+                t += `<td> ${m.message.amount} </td>`;
+                t += `<td> <button type="button" value="${m.message.upi_txid}" 
+                        class="btn btn-info"
+                        onclick="pay_through_cashier('${m.sender}', '${m.message.receiver_flo_id}', 
+                            '${m.message.upi_txid}', '${m.message.amount}')
+                        ">Transfer Cash To Receiver!</button> 
+                    </td>`;
+                t += `</tr>`;
+            
+                pay_through_cashier_table.insertAdjacentHTML("beforeend", t);
+            }
+
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    async function pay_through_cashier(sender_flo_id='', vendor_flo_id='', upi_txid='', amount_to_pay=0) {
+        try {
+            if(!Object.keys(token_app.master_configurations.cashiers).includes(myFloID)) return;
+            if(vendor_flo_id.length<1) throw new Error("Invalid Receiver Id");
+            if(sender_flo_id.length<1) throw new Error("Invalid Sender Id");
+            if(upi_txid.length<1) throw new Error("Invalid UPI Txid");
+            if(typeof amount_to_pay!=="number" || amount_to_pay<=0) 
+                throw new Error("Invalid amount.");
+            let flo_statement = `transfer ${amount_to_pay} rupee# on behalf of ${sender_flo_id}`;
+            let send_token_cnf = confirm(`Send ${amount_to_pay} to ${vendor_flo_id} ?`);
+            if (send_token_cnf == true) {
+                const token_balance_url = `https://ranchimallflo.duckdns.org/api/v1.0/getFloAddressBalance?token=rupee&floAddress=${myFloID}`;
+                const my_token_balance = await ajaxGet(token_balance_url);
+                let err_msg = '';
+
+                if(typeof my_token_balance!=="object" 
+                || typeof my_token_balance.balance!=="number"
+                || my_token_balance.balance<amount_to_pay) {
+                    err_msg = `INFO: You have insufficient rupee balance.`;
+                    alert(err_msg);
+                    return false;
+                }
+
+                let flo_txid = await floBlockchainAPI.sendTx(myFloID, vendor_flo_id, 0.001, myPrivKey, flo_statement)
+                console.log(flo_txid);
+                if(typeof flo_txid !== "string") {
+                    alert(`Transaction unsuccessfull.`);
+                    return false;
+                } else {
+                    compactIDB.addData('pay_thru_cashier', {
+                        sender_flo_id,
+                        vendor_flo_id,
+                        upi_txid,
+                        flo_txid,
+                        'datetime': + new Date()
+                    }, upi_txid);
+                    alert(`Transaction successfull: ${flo_txid}.`);
+                    alert(`INR ${amount_to_pay} sent to ${vendor_flo_id}`)
+                    return false;
+                }
+            }
+            
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
 
 </script>
 
